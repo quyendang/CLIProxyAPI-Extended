@@ -1,5 +1,5 @@
 # ==============================
-# Build stage
+# Build backend
 # ==============================
 FROM golang:1.26-alpine AS builder
 
@@ -28,7 +28,21 @@ RUN CGO_ENABLED=0 \
 
 
 # ==============================
-# Runtime stage
+# Download compatible WebUI
+# ==============================
+FROM alpine:3.23 AS webui
+
+RUN apk add --no-cache curl ca-certificates
+
+RUN mkdir -p /static
+
+RUN curl -fL \
+    "https://github.com/router-for-me/Cli-Proxy-API-Management-Center/releases/download/v1.22.18/management.html" \
+    -o /static/management.html
+
+
+# ==============================
+# Runtime
 # ==============================
 FROM alpine:3.23
 
@@ -38,11 +52,19 @@ RUN apk add --no-cache \
 
 RUN mkdir -p \
     /CLIProxyAPI \
+    /CLIProxyAPI/static \
     /root/.cli-proxy-api
 
-COPY --from=builder /app/CLIProxyAPIPlus /CLIProxyAPI/CLIProxyAPIPlus
+COPY --from=builder \
+    /app/CLIProxyAPIPlus \
+    /CLIProxyAPI/CLIProxyAPIPlus
 
-COPY config.yaml /CLIProxyAPI/config.yaml
+COPY config.yaml \
+    /CLIProxyAPI/config.yaml
+
+COPY --from=webui \
+    /static/management.html \
+    /CLIProxyAPI/static/management.html
 
 WORKDIR /CLIProxyAPI
 
