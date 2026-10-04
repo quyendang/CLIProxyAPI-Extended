@@ -1,3 +1,6 @@
+# ==============================
+# Build stage
+# ==============================
 FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
@@ -8,28 +11,46 @@ RUN go mod download
 
 COPY . .
 
-ARG VERSION=dev
-ARG COMMIT=none
-ARG BUILD_DATE=unknown
+ARG VERSION=railway
+ARG COMMIT=railway
+ARG BUILD_DATE=railway
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION}-plus' -X 'main.Commit=${COMMIT}' -X 'main.BuildDate=${BUILD_DATE}'" -o ./CLIProxyAPIPlus ./cmd/server/
+RUN CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    go build \
+    -ldflags="-s -w \
+    -X 'main.Version=${VERSION}-plus' \
+    -X 'main.Commit=${COMMIT}' \
+    -X 'main.BuildDate=${BUILD_DATE}'" \
+    -o ./CLIProxyAPIPlus \
+    ./cmd/server/
 
+
+# ==============================
+# Runtime stage
+# ==============================
 FROM alpine:3.23
 
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache \
+    tzdata \
+    ca-certificates
 
-RUN mkdir /CLIProxyAPI
+RUN mkdir -p \
+    /CLIProxyAPI \
+    /root/.cli-proxy-api
 
-COPY --from=builder ./app/CLIProxyAPIPlus /CLIProxyAPI/CLIProxyAPIPlus
+COPY --from=builder /app/CLIProxyAPIPlus /CLIProxyAPI/CLIProxyAPIPlus
 
-COPY config.example.yaml /CLIProxyAPI/config.example.yaml
+COPY config.yaml /CLIProxyAPI/config.yaml
 
 WORKDIR /CLIProxyAPI
 
+ENV TZ=Asia/Ho_Chi_Minh
+
+RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo "${TZ}" > /etc/timezone
+
 EXPOSE 8317
-
-ENV TZ=Asia/Shanghai
-
-RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo "${TZ}" > /etc/timezone
 
 CMD ["./CLIProxyAPIPlus"]
