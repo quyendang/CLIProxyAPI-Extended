@@ -9,12 +9,12 @@ tls:
 
 remote-management:
   allow-remote: true
-  secret-key: ''
+  secret-key: '123456'
 
 auth-dir: '~/.cli-proxy-api'
 
 api-keys:
-  - 'sk-your-secret-key'
+  - 'sk-173e1dadc4ebb2ce-v4m1xl-d8b35119'
 
 debug: false
 
