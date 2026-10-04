@@ -9,7 +9,7 @@ tls:
 
 remote-management:
   allow-remote: true
-  secret-key: "123456"
+  secret-key: "sk-173e1dadc4ebb2ce-v4m1xl-d8b35119"
   disable-control-panel: false
 
   # QUAN TRỌNG:
