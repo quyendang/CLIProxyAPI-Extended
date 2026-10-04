@@ -1,0 +1,29 @@
+host: ''
+
+port: 8317
+
+tls:
+  enable: false
+  cert: ''
+  key: ''
+
+remote-management:
+  allow-remote: true
+  secret-key: ''
+
+auth-dir: '~/.cli-proxy-api'
+
+api-keys:
+  - 'sk-your-secret-key'
+
+debug: false
+
+logging-to-file: false
+
+usage-statistics-enabled: true
+
+show-provider-prefixes: true
+
+disable-auth: false
+
+use-canonical-translator: true
